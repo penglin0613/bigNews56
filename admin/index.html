@@ -25,21 +25,55 @@
         </div>
         <!-- 左侧导航栏 -->
         <div class="menu">
-            <div class="level01 active"><a href="#" target="main_frame"><i
-                        class="iconfont icon-yidiandiantubiao04"></i><span>首页</span></a></div>
-            <div class="level01"><a href="#"><i class="iconfont icon-icon-article"></i><span>文章管理</span><b
-                        class="iconfont icon-arrowdownl"></b></a></div>
+             <!-- 左侧导航栏:首页 -->
+            <div class="level01 active">
+                <a href="./main_count.html" target="main_frame">
+                    <i class="iconfont icon-yidiandiantubiao04"></i>
+                    <span>首页</span>
+                </a>
+            </div>
+            <div class="level01">
+                <a href="#">
+                    <i class="iconfont icon-icon-article"></i>
+                    <span>文章管理</span>
+                    <b class="iconfont icon-arrowdownl"></b>
+                </a>
+            </div>
+            <!-- 左侧导航栏:文章管理 -->
             <ul class="level02">
-                <li><a href="#" target="main_frame"><i class="iconfont icon-previewright"></i><span>文章列表</span></a></li>
-                <li><a href="#" target="main_frame"><i class="iconfont icon-previewright"></i><span>发表文章</span></a></li>
-                <li><a href="#" target="main_frame"><i class="iconfont icon-previewright"></i><span>文章类别管理</span></a>
+                <li>
+                    <a href="./article_list.html" target="main_frame">
+                        <i class="iconfont icon-previewright"></i>
+                        <span>文章列表</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="./article_release.html" target="main_frame">
+                        <i class="iconfont icon-previewright"></i>
+                        <span>发表文章</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="./article_category.html" target="main_frame">
+                        <i class="iconfont icon-previewright"></i>
+                        <span>文章类别管理</span>
+                    </a>
                 </li>
             </ul>
-
-            <div class="level01"><a href="#" target="main_frame"><i
-                        class="iconfont icon-comment"></i><span>评论管理</span></a></div>
-            <div class="level01" id="user"><a href="#" target="main_frame"><i
-                        class="iconfont icon-user"></i><span>个人中心</span></a></div>
+            <!-- 左侧导航栏:评论管理 -->
+            <div class="level01">
+                <a href="./comment_list.html" target="main_frame">
+                    <i class="iconfont icon-comment"></i>
+                    <span>评论管理</span>
+                </a>
+            </div>
+            <!-- 左侧导航栏:个人中心 -->
+            <div class="level01" id="user">
+                <a href="./user.html" target="main_frame">
+                    <i class="iconfont icon-user"></i>
+                    <span>个人中心</span>
+                </a>
+            </div>
         </div>
         <!-- 顶部栏 -->
         <div class="header_bar">
@@ -51,13 +85,16 @@
         </div>
         <!-- 右侧主体内容 -->
         <div class="main" id="main_body">
-
+            <!-- 默认的显示,就是echarts图表页面 -->
+            <iframe name="main_frame" src="./main_count.html" frameborder="0"
+                style="width: 100%; height: 100%;"></iframe>
         </div>
     </div>
 
+    <script src="./libs/http.js"></script>
     <script>
         //入口函数
-        $(function(){
+        $(function () {
             //一:一进到首页就显示登录的管理员信息. 
             //1.1 原生发ajax请求如何带token. 
             // //1.创建xhr对象
@@ -76,30 +113,30 @@
 
             //1.2 jQuery发送ajax请求如何带token过去. 
             $.ajax({
-                type:'get',
-                url:'http://localhost:8080/api/v1/admin/user/info',
+                type: 'get',
+                // url:'http://localhost:8080/api/v1/admin/user/info',
+                url: BigNew.user_info,
                 //headers
                 // headers:{
                 //     Authorization:localStorage.getItem('token')
                 // },
-                success:function(backData){
+                success: function (backData) {
                     //console.log(backData);
-                    if(backData.code == 200){
-                        $('.user_info>img').attr('src',backData.data.userPic);
+                    if (backData.code == 200) {
+                        $('.user_info>img').attr('src', backData.data.userPic);
                         $('.user_info>span>i').text(backData.data.nickname);
-                        $('.user_center_link>img').attr('src',backData.data.userPic);
+                        $('.user_center_link>img').attr('src', backData.data.userPic);
                     }
                 }
             });
 
 
-           
 
             //二:登出
             //给登出按钮设置一个点击事件,删除在本地保存的token. 
-            $('.logout').on('click',function(e){
+            $('.logout').on('click', function (e) {
                 e.preventDefault();
-                if(confirm('你确定要退出吗?')){
+                if (confirm('你确定要退出吗?')) {
                     //删除本地保存的token
                     localStorage.removeItem('token');
                     //打回到登录页
@@ -107,9 +144,10 @@
                 }
             })
 
-            
+
 
         })
     </script>
 </body>
+
 </html>
