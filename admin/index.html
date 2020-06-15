@@ -95,6 +95,17 @@
 
            
 
+            //二:登出
+            //给登出按钮设置一个点击事件,删除在本地保存的token. 
+            $('.logout').on('click',function(e){
+                e.preventDefault();
+                if(confirm('你确定要退出吗?')){
+                    //删除本地保存的token
+                    localStorage.removeItem('token');
+                    //打回到登录页
+                    window.location.href = './login.html';
+                }
+            })
 
             
 
