@@ -94,6 +94,9 @@
             $('#myModal').modal();
 
             if (backData.code == 200) {
+              //把返回的token给保存起来. 
+              localStorage.setItem('token',backData.token);
+
               //模态框关闭的时候触发跳转到首页. 
               $('#myModal').on('hidden.bs.modal', function (e) {
                 //1.6 如果登录成功就跳转到首页(index.html)
