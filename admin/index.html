@@ -32,7 +32,9 @@
                     <span>首页</span>
                 </a>
             </div>
+            <!-- 左侧导航栏:文章管理 -->
             <div class="level01">
+                <!-- <a href="./article_list.html" target="main_frame"> -->
                 <a href="#">
                     <i class="iconfont icon-icon-article"></i>
                     <span>文章管理</span>
@@ -143,6 +145,42 @@
                     window.location.href = './login.html';
                 }
             })
+
+
+            //三:左侧导航栏一级菜单(div)点击事件. 
+            $('div.level01').on('click',function(){
+                //3.1 当前点击的一级菜单添加一个active类,其他的兄弟一级菜单移除这个类. 
+                $(this).addClass('active').siblings('div').removeClass('active');
+
+                //3.2 判断一下当前点击的一级菜单是否是 文章管理
+                if($(this).index() == 1){
+                    //a.把二级菜单显示就隐藏,隐藏就显示. 
+                    $('ul.level02').slideToggle();
+                    //b.让小尖尖动起来,就是给那个b标签 没有就添加rotate0类, 有就删除这个类. 
+                    $(this).find('b').toggleClass('rotate0');
+
+                    //触发第一个二级菜单的点击事件. 
+                    // $('ul.level02>li').first().trigger('click');
+
+
+                    //二级菜单第一个li标签里面的a标签, dom元素的点击事件. 
+                    //会有一个事件冒泡. 触发li标签的单击事件. 
+                    //因为是dom元素a标签的点击事件,所以会触发a标签的跳转. 
+                    $('ul.level02>li:eq(0)>a')[0].click();
+                }
+            })
+
+            //四:左侧导航栏二级菜单(li)点击事件. 
+            $('ul.level02>li').on('click',function(){
+                //4.1 当前点击的li标签添加active类,其他的兄弟li移除active类. 
+                $(this).addClass('active').siblings('li').removeClass('active');
+
+                //4.2 待解决的需求
+                //点击一级菜单"文章管理",有一个默认的二级菜单"文章列表"的选中. 
+                //做法有2种. 
+                //a.简单的
+                //b.难一点的
+            });
 
 
 
