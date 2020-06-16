@@ -63,6 +63,8 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <!-- 隐藏域,保存当前点击的文章分类的id -->
+                        <input type="hidden" id="categoryId" name="">
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
                             <input type="text" class="form-control" id="recipient-name">
@@ -74,7 +76,7 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-default" id='btnCancel' data-dismiss="modal">取消</button>
                     <button type="button" class="btn btn-primary" id="addOrEdit">Send message</button>
                 </div>
             </div>
@@ -88,7 +90,7 @@
             <td>{{v.name}}</td>
             <td>{{v.slug}}</td>
             <td class="text-center">
-                <a href="javascript:void(0)" data-toggle="modal" data-target="#myModal"
+                <a href="javascript:void(0)" data-id="{{v.id}}" data-toggle="modal" data-target="#myModal"
                     class=" btn btn-info btn-xs">编辑</a>
                 <a href="javascript:void(0)" data-id="{{v.id}}" class="btn btn-danger btn-xs">删除</a>
             </td>
@@ -129,6 +131,17 @@
                     //alert('模态框是点击编辑按钮弹出来的');
                     $('#myModalLabel').text('编辑分类');
                     $('#addOrEdit').text('编辑').addClass('btn-success').removeClass('btn-primary');
+
+
+                    //获取当前点击的编辑按钮对应的 分类名字和 分类别名. 
+                    var categoryId = $(e.relatedTarget).attr('data-id');
+                    var categorySlug = $(e.relatedTarget).parent().prev().text().trim();
+                    var categoryName = $(e.relatedTarget).parent().prev().prev().text().trim();
+                    console.log(categoryId, categoryName, categorySlug);
+                    //把值赋值给弹出的模态框中的对应的标签. 
+                    $('#categoryId').val(categoryId);
+                    $('#recipient-name').val(categoryName);
+                    $('#message-text').val(categorySlug);
                 }
             })
 
@@ -165,9 +178,52 @@
 
                 } else {
                     //alert('此时是编辑功能');
+                    //获取要编辑的文章分类的id(隐藏域中),还有获取修改后的文章名字和别名
+                    var categoryId = $('#categoryId').val().trim(); //文章分类id
+                    var categoryName = $('#recipient-name').val().trim(); //文章分类名
+                    var categorySlug = $('#message-text').val().trim(); // 文章分类别名
+                    //发送ajax请求完成编辑. 
+                    $.ajax({
+                        type: 'post',
+                        url: BigNew.category_edit,
+                        data: {
+                            id: categoryId,
+                            name: categoryName,
+                            slug: categorySlug
+                        },
+                        success: function (backData) {
+                            //console.log(backData);
+                            if (backData.code == 200) {
+                                alert('编辑成功!');
+                                //新增成功后重新加载数据渲染
+                                getData();
+                                //把模态框隐藏
+                                $('#myModal').modal('hide');
+                                //模态框中输入的文本清空. 
+                                $('#recipient-name').val("");
+                                $('#message-text').val("");
+                            }
+                        }
+                    });
                 }
 
             })
+
+
+            //四: 
+            //给模态框中的取消按钮设置一个点击事件. 
+            $('#myModal #btnCancel').on('click', function () {
+                //清空模态框中的表单的值
+                //1. 
+                // $('#recipient-name').val("");
+                // $('#message-text').val("");
+
+                //2. reset() 方法可把表单中的元素重置为它们的默认值。
+                $('#myModal form')[0].reset(); //reset()方法是dom元素点出来的. 
+            })
+
+
+
         });
     </script>
 </body>
