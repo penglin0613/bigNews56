@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="./css/iconfont.css">
     <link rel="stylesheet" href="./css/main.css">
     <script src="./libs/jquery-1.12.4.min.js"></script>
+    <script src="./libs/bootstrap/js/bootstrap.min.js"></script>
+    <script src="./libs/jquery.twbsPagination.js"></script>
     <!-- 引入模板引擎js文件 -->
     <script src="./libs/template-web.js"></script>
 </head>
@@ -69,9 +71,201 @@
                 </tbody>
             </table>
             <div class="row text-center">
+                <!-- 分页插件 -->
+                <ul id="pagination" class="pagination-sm"></ul>
+                <p style="display: none;">没有数据!</p>
             </div>
         </div>
     </div>
+
+    <!-- 准备一个 文章分类模板 -->
+    <script id="categoryList" type="text/html">
+        <option value="">所有分类</option>
+        {{each data v}}
+        <option value="{{v.id}}">{{v.name}}</option>
+        {{/each}}
+    </script>
+
+    <!-- 准备一个 文章模板 -->
+    <script id="articleList" type="text/html">
+        {{each data.data v}}
+        <tr>
+            <td>{{v.title}}</td>
+            <td>{{v.author}}</td>
+            <td>{{v.category}}</td>
+            <td class="text-center">{{v.date}}</td>
+            <td class="text-center">{{v.state}}</td>
+            <td class="text-center">
+                <a href="article_edit.html" class="btn btn-default btn-xs">编辑</a>
+                <a href="javascript:void(0);" data-id="{{v.id}}" class="btn btn-danger btn-xs delete">删除</a>
+            </td>
+        </tr>
+        {{/each}}
+    </script>
+    <script src="./libs/http.js"></script>
+    <script>
+        //入口函数
+        $(function () {
+            //一: 一进到文章列表页,就显示所有的文章分类. 
+            //发送ajax获取所有的文章分类数据,通过模板引擎显示. 
+            $.ajax({
+                type: 'get',
+                url: BigNew.category_list,
+                success: function (backData) {
+                    //console.log(backData);
+                    if (backData.code == 200) {
+                        //通过模板引擎渲染到页面上.
+                        var resHtml = template('categoryList', backData);
+                        $('#selCategory').html(resHtml);
+                    }
+                }
+            });
+
+            //把发送ajax请求获取文章并渲染做一个封装. 
+            function getData(myPage, callback) {
+                $.ajax({
+                    type: 'get',
+                    url: BigNew.article_query,
+                    data: {
+                        type: $('#selCategory').val().trim(),
+                        state: $('#selStatus').val().trim(),
+                        page: myPage,
+                        perpage: 5
+                    },
+                    success: function (backData) {
+                        console.log(backData);
+                        if (backData.code == 200) {
+                            var res1 = template('articleList', backData);
+                            $('tbody').html(res1);
+                            //判断
+                            if (backData.data.data.length !=0 && callback != null) {
+                                $('#pagination').show().next('p').hide();
+                                callback(backData); //调用回调函数,把返回的文章数据作为实参传递过去. 
+                            }else if(backData.data.data.length ==0){
+                                $('#pagination').hide().next('p').show();
+                            }
+                        }
+                    }
+                });
+            }
+
+
+            //二: 一进到页面,发送ajax请求,获取默认的分类和默认的状态下的所有文章. 
+            getData(1, function (backData) {
+                //分页插件
+                $('#pagination').twbsPagination({
+                    totalPages: backData.data.totalPage, //总页数
+                    visiblePages: 5, //可见的页码
+                    first: '首页',
+                    prev: '上一页',
+                    next: '下一页',
+                    last: '尾页',
+                    // 这个事件是页码被点击后的回调函数. 
+                    onPageClick: function (event, page) {
+                        //继续发送ajax请求. 获取当前点击的当前页的文章数据并渲染. 
+                        getData(page, null);
+                    }
+                });
+            })
+
+            //三:筛选条件搜索文章
+            //给搜索按钮设置点击事件,
+            $('#btnSearch').on('click', function (e) {
+                e.preventDefault();
+                //发送ajax获取数据渲染. 
+                getData(1, function (backData) {
+                    //筛选条件发生了改变,那文章总页码也有可能会发生改变. 
+                    //那就应该要根据总页码重绘页码条
+                    $('#pagination').twbsPagination('changeTotalPages', backData
+                        .data.totalPage, 1);
+                });
+            })
+
+
+
+
+            //--------------------------------------------------------------------------------
+            // //二: 一进到页面,发送ajax请求,获取默认的分类和默认的状态下的所有文章. 
+            // $.ajax({
+            //     type: 'get',
+            //     url: BigNew.article_query,
+            //     data: {
+            //         type: $('#selCategory').val().trim(),
+            //         state: $('#selStatus').val().trim(),
+            //         page: 1,
+            //         perpage: 5
+            //     },
+            //     success: function (backData) {
+            //         console.log(backData);
+            //         if (backData.code == 200) {
+            //             var res1 = template('articleList', backData);
+            //             $('tbody').html(res1);
+
+            //             //分页插件
+            //             $('#pagination').twbsPagination({
+            //                 totalPages: backData.data.totalPage, //总页数
+            //                 visiblePages: 5, //可见的页码
+            //                 first: '首页',
+            //                 prev: '上一页',
+            //                 next: '下一页',
+            //                 last: '尾页',
+            //                 // 这个事件是页码被点击后的回调函数. 
+            //                 onPageClick: function (event, page) {
+            //                     //继续发送ajax请求. 获取当前点击的当前页的文章数据并渲染. 
+            //                     $.ajax({
+            //                         type: 'get',
+            //                         url: BigNew.article_query,
+            //                         data: {
+            //                             type: $('#selCategory').val().trim(),
+            //                             state: $('#selStatus').val().trim(),
+            //                             page: page, //当前点击的页码
+            //                             perpage: 5
+            //                         },
+            //                         success: function (backData) {
+            //                             console.log(backData);
+            //                             if (backData.code == 200) {
+            //                                 var res1 = template(
+            //                                     'articleList', backData);
+            //                                 $('tbody').html(res1);
+            //                             }
+            //                         }
+            //                     });
+            //                 }
+            //             });
+            //         }
+            //     }
+            // });
+
+            // //三:筛选条件搜索文章
+            // //给搜索按钮设置点击事件,
+            // $('#btnSearch').on('click', function (e) {
+            //     e.preventDefault();
+            //     //发送ajax获取数据渲染. 
+            //     $.ajax({
+            //         type: 'get',
+            //         url: BigNew.article_query,
+            //         data: {
+            //             type: $('#selCategory').val().trim(),
+            //             state: $('#selStatus').val().trim(),
+            //             page: 1,
+            //             perpage: 5
+            //         },
+            //         success: function (backData) {
+            //             console.log(backData);
+            //             if (backData.code == 200) {
+            //                 var res1 = template('articleList', backData);
+            //                 $('tbody').html(res1);
+
+            //                 //筛选条件发生了改变,那文章总页码也有可能会发生改变. 
+            //                 //那就应该要根据总页码重绘页码条
+            //                 $('#pagination').twbsPagination('changeTotalPages',backData.data.totalPage,1);
+            //             }
+            //         }
+            //     });
+            // })
+
+        })
+    </script>
 </body>
 
 </html>
