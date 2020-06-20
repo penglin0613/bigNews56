@@ -62,36 +62,47 @@
 
     <!-- 折线图 -->
     <script>
-        var json = '{"code":200,"msg":"获取成功","date":[{"date":"2019-05-20","count":23},{"date":"2019-05-21","count":19},{"date":"2019-05-22","count":29},{"date":"2019-05-23","count":24},{"date":"2019-05-24","count":28},{"date":"2019-05-25","count":28},{"date":"2019-05-26","count":19},{"date":"2019-05-27","count":25},{"date":"2019-05-28","count":25}]}';
-        var obj = JSON.parse(json);
-        loadEchars(obj);
+        //发送ajax请求,得到折线图的真实数据. 
+        $.ajax({
+            url:'http://localhost:8080/api/v1/admin/data/article',
+            success:function(backData){
+                console.log(backData);
+
+                loadEchars(backData);
+            }
+        });
 
         function loadEchars(obj) {
             // 基于准备好的dom，初始化echarts实例
             var myChart = echarts.init(document.getElementById('curve_show'));
 
-            var data = [];
-            var date = [];
+            var data = [];//y轴数据
+            var date = [];//x轴数据
             for (var i = 0; i < obj.date.length; i++) {
                 data.push(obj.date[i].count);
                 date.push(obj.date[i].date);
             }
-
             option = {
+                // 提示组件
                 tooltip: {
                     trigger: 'axis',
+                    //pt当前鼠标位置
+                    //pt[0] 鼠标x轴位置 
+                    //pt[1] 鼠标y轴位置
                     position: function (pt) {
-                        return [pt[0], '10%'];
+                        return [pt[0]+10, pt[1]+10];
                     }
                 },
+                //标题
                 title: {
                     left: 'center',
                     text: '月新增文章数',
                 },
-
+                //x轴
                 xAxis: {
-                    name: '日',
+                    name:'日',
                     type: 'category',
+                    // 两边留白策略,true就是需要留白
                     boundaryGap: false,
                     data: date
                 },
@@ -99,6 +110,7 @@
                     data: ['新增文章'],
                     top: '40'
                 },
+                // 工具栏
                 toolbox: {
                     show: true,
                     feature: {
@@ -110,18 +122,22 @@
                         restore: {},
                         saveAsImage: {}
                     },
-                    right: 50
+                    right:50
                 },
                 yAxis: {
                     type: 'value',
-                    boundaryGap: [0, '100%']
+                    boundaryGap: [0, '100%'],
+                    //y轴能够显示的最大值
+                    max:40
                 },
                 series: [
                     {
                         name: '新增文章',
                         type: 'line',
+                        // 是否平滑
                         smooth: true,
-                        // symbol: 'none',
+                        // 小圆点,注释掉就是默认的
+                        // symbol: 'circle',
                         sampling: 'average',
                         itemStyle: {
                             color: '#f80'
@@ -142,7 +158,8 @@
                         data: data
                     }
                 ],
-            }
+            };
+
             // 使用刚指定的配置项和数据显示图表。
             myChart.setOption(option);
         }
